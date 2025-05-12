@@ -13,23 +13,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug - Print available secrets
-        run: |
-          echo "SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}"
-          
-      - name: Read hydration message and send to Slack
+      - name: Send hydration message to Slack (on success)
+        if: ${{ success() }}  # Only runs if previous steps succeed
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}
         run: |
           # Read the message and escape newlines
-          MESSAGE=$(cat .github/hydration-message.txt | sed ':a;N;$!ba;s/\n/\\n/g')
-          echo "Sending this message to Slack: $MESSAGE"
-          
-          # Prepare the JSON payload
+          MESSAGE=$(sed ':a;N;$!ba;s/\n/\\n/g' .github/hydration-message.txt)
           JSON="{\"text\":\"$MESSAGE\"}"
-          echo "JSON Payload: $JSON"
 
-          # Send the message to Slack using the webhook URL
+          echo "Sending to Slack:"
+          echo "$JSON"
+
+          curl -X POST -H "Content-type: application/json" \
+            --data "$JSON" \
+            "$SLACK_WEBHOOK_URL"
+
+      - name: Send hydration message to Slack (on failure)
+        if: ${{ failure() }}  # Only runs if any previous step fails
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}
+        run: |
+          # Read the message and escape newlines
+          MESSAGE=$(sed ':a;N;$!ba;s/\n/\\n/g' .github/hydration-message.txt)
+          JSON="{\"text\":\"$MESSAGE\"}"
+
+          echo "Sending to Slack (failure):"
+          echo "$JSON"
+
           curl -X POST -H "Content-type: application/json" \
             --data "$JSON" \
             "$SLACK_WEBHOOK_URL"
