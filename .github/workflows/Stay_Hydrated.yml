@@ -17,10 +17,10 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}
         run: |
-          # Read the hydration message from the file and escape newlines
-          MESSAGE=$(cat .github/hydration-message.txt | sed ':a;N;$!ba;s/\n/\\n/g')
-          
-          # Prepare the JSON payload
+          # Read the hydration message from the file
+          MESSAGE=$(cat .github/hydration-message.txt)
+
+          # Prepare the JSON payload with newlines directly in the message
           JSON="{\"text\":\"$MESSAGE\"}"
 
           # Send the message to Slack using the webhook
