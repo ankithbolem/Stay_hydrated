@@ -14,9 +14,15 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}
         run: |
-          MESSAGE="💧 *Time for a Water Break!*\nCould you please take a sip of water?\nYour body might be getting dehydrated.\nStay hydrated to keep your energy up and your focus sharp — let’s work seamlessly and stay refreshed! 💪"
-          JSON_PAYLOAD=$(printf '{"text":"%s"}' "$MESSAGE")
+          MESSAGE=$(cat <<EOF
+💧 *Time for a Water Break!*
+Could you please take a sip of water?
+Your body might be getting dehydrated.
+Stay hydrated to keep your energy up and your focus sharp — let’s work seamlessly and stay refreshed! 💪
+EOF
+)
+          JSON="{\"text\":\"$MESSAGE\"}"
 
-          curl -X POST -H 'Content-type: application/json' \
-            --data "$JSON_PAYLOAD" \
+          curl -X POST -H "Content-type: application/json" \
+            --data "$JSON" \
             "$SLACK_WEBHOOK_URL"
