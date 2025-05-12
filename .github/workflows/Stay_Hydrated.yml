@@ -1,10 +1,9 @@
-
 name: Daily Hydration Reminder to Team
 
 on:
   schedule:
-    - cron: '* * * * *'  # Every minute
-  workflow_dispatch:
+    - cron: '* * * * *'  # Runs every minute
+  workflow_dispatch:     # Manual trigger
 
 jobs:
   hydration-reminder:
@@ -18,8 +17,13 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}
         run: |
-          MESSAGE=$(cat .github/hydration-message.txt)
+          # Read the hydration message from the file and escape newlines
+          MESSAGE=$(cat .github/hydration-message.txt | sed ':a;N;$!ba;s/\n/\\n/g')
+          
+          # Prepare the JSON payload
           JSON="{\"text\":\"$MESSAGE\"}"
+
+          # Send the message to Slack using the webhook
           curl -X POST -H "Content-type: application/json" \
             --data "$JSON" \
             "$SLACK_WEBHOOK_URL"
