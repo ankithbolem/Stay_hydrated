@@ -1,46 +1,25 @@
+
 name: Daily Hydration Reminder to Team
 
 on:
   schedule:
-    - cron: '* * * * *'  # Runs every minute
-  workflow_dispatch:     # Manual trigger
+    - cron: '* * * * *'  # Every minute
+  workflow_dispatch:
 
 jobs:
   hydration-reminder:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Send hydration message to Slack (on success)
-        if: ${{ success() }}  # Only runs if previous steps succeed
+      - name: Read Message and Send to Slack
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}
         run: |
-          # Read the message and escape newlines
-          MESSAGE=$(sed ':a;N;$!ba;s/\n/\\n/g' .github/hydration-message.txt)
+          MESSAGE=$(cat .github/hydration-message.txt)
           JSON="{\"text\":\"$MESSAGE\"}"
-
-          echo "Sending to Slack:"
-          echo "$JSON"
-
-          curl -X POST -H "Content-type: application/json" \
-            --data "$JSON" \
-            "$SLACK_WEBHOOK_URL"
-
-      - name: Send hydration message to Slack (on failure)
-        if: ${{ failure() }}  # Only runs if any previous step fails
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}
-        run: |
-          # Read the message and escape newlines
-          MESSAGE=$(sed ':a;N;$!ba;s/\n/\\n/g' .github/hydration-message.txt)
-          JSON="{\"text\":\"$MESSAGE\"}"
-
-          echo "Sending to Slack (failure):"
-          echo "$JSON"
-
           curl -X POST -H "Content-type: application/json" \
             --data "$JSON" \
             "$SLACK_WEBHOOK_URL"
