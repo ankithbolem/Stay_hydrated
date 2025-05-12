@@ -13,17 +13,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Send hydration message to Slack
+      - name: Debug - Print available secrets
+        run: |
+          echo "SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}"
+          
+      - name: Read hydration message and send to Slack
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}
         run: |
           # Read the message and escape newlines
-          MESSAGE=$(sed ':a;N;$!ba;s/\n/\\n/g' .github/hydration-message.txt)
+          MESSAGE=$(cat .github/hydration-message.txt | sed ':a;N;$!ba;s/\n/\\n/g')
+          echo "Sending this message to Slack: $MESSAGE"
+          
+          # Prepare the JSON payload
           JSON="{\"text\":\"$MESSAGE\"}"
+          echo "JSON Payload: $JSON"
 
-          echo "Sending to Slack:"
-          echo "$JSON"
-
+          # Send the message to Slack using the webhook URL
           curl -X POST -H "Content-type: application/json" \
             --data "$JSON" \
             "$SLACK_WEBHOOK_URL"
