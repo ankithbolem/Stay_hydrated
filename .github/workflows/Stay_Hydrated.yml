@@ -2,8 +2,8 @@ name: Daily Hydration Reminder to Team
 
 on:
   schedule:
-    - cron: '0 10 * * *'  # Runs every day at 10 AM UTC (change for testing)
-  workflow_dispatch:     # Manual trigger
+    - cron: '* * * * *'  # Runs every day at 10 AM UTC (change for testing)
+  #workflow_dispatch:     # Manual trigger
 
 jobs:
   hydration-reminder:
