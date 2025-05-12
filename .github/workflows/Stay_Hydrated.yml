@@ -2,7 +2,7 @@ name: Daily Hydration Reminder to Team
 
 on:
   schedule:
-    - cron: '0 10 * * *'  # Every day at 10:00 AM UTC
+    - cron: '* * * * *'  # Every minute
   workflow_dispatch:
 
 jobs:
@@ -10,17 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send Hydration Reminder to Slack
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Read Message and Send to Slack
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.STAY_HYDRATED }}
         run: |
-          MESSAGE=$(cat <<EOF
-💧 *Time for a Water Break!*
-Could you please take a sip of water?
-Your body might be getting dehydrated.
-Stay hydrated to keep your energy up and your focus sharp — let’s work seamlessly and stay refreshed! 💪
-EOF
-)
+          MESSAGE=$(cat .github/hydration-message.txt)
           JSON="{\"text\":\"$MESSAGE\"}"
 
           curl -X POST -H "Content-type: application/json" \
